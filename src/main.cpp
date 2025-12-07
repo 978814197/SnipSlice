@@ -1,7 +1,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QTranslator>
 #include <QLocale>
+#include "ImageProcessor.h"
 
 int main(int argc, char* argv[])
 {
@@ -13,7 +15,14 @@ int main(int argc, char* argv[])
         QGuiApplication::installTranslator(&translator);
     }
 
+    // 创建ImageProcessor单例实例
+    ImageProcessor imageProcessor;
+
     QQmlApplicationEngine engine;
+
+    // 将ImageProcessor暴露给QML
+    engine.rootContext()->setContextProperty("ImageProcessor", &imageProcessor);
+
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreationFailed,

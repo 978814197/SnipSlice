@@ -210,13 +210,63 @@ Rectangle {
         }
     }
 
-    // 获取切割区域信息
+    // 获取切割区域信息（转换为原始图片坐标）
     function getSelectionRect() {
+        // 选区在imageArea中的坐标
+        var minX = Math.min(firstClick.x, secondClick.x)
+        var minY = Math.min(firstClick.y, secondClick.y)
+        var maxX = Math.max(firstClick.x, secondClick.x)
+        var maxY = Math.max(firstClick.y, secondClick.y)
+
+        // 减去imageContainer的偏移
+        minX -= imageContainer.x
+        minY -= imageContainer.y
+        maxX -= imageContainer.x
+        maxY -= imageContainer.y
+
+        // 除以缩放比例，得到displayImage中的坐标
+        minX /= imageContainer.scale
+        minY /= imageContainer.scale
+        maxX /= imageContainer.scale
+        maxY /= imageContainer.scale
+
+        // 获取图片的实际尺寸和显示尺寸
+        var sourceWidth = displayImage.sourceSize.width
+        var sourceHeight = displayImage.sourceSize.height
+        var displayWidth = displayImage.paintedWidth
+        var displayHeight = displayImage.paintedHeight
+
+        // 计算图片在displayImage中的偏移（由于PreserveAspectFit）
+        var offsetX = (displayImage.width - displayWidth) / 2
+        var offsetY = (displayImage.height - displayHeight) / 2
+
+        // 减去偏移，得到在实际显示图片区域的坐标
+        minX -= offsetX
+        minY -= offsetY
+        maxX -= offsetX
+        maxY -= offsetY
+
+        // 计算缩放比例（显示尺寸到原始尺寸）
+        var scaleX = sourceWidth / displayWidth
+        var scaleY = sourceHeight / displayHeight
+
+        // 转换为原始图片坐标
+        var cropX = minX * scaleX
+        var cropY = minY * scaleY
+        var cropWidth = (maxX - minX) * scaleX
+        var cropHeight = (maxY - minY) * scaleY
+
+        // 确保坐标在有效范围内
+        cropX = Math.max(0, Math.min(cropX, sourceWidth))
+        cropY = Math.max(0, Math.min(cropY, sourceHeight))
+        cropWidth = Math.max(1, Math.min(cropWidth, sourceWidth - cropX))
+        cropHeight = Math.max(1, Math.min(cropHeight, sourceHeight - cropY))
+
         return {
-            x: Math.min(firstClick.x, secondClick.x) / imageContainer.scale,
-            y: Math.min(firstClick.y, secondClick.y) / imageContainer.scale,
-            width: Math.abs(secondClick.x - firstClick.x) / imageContainer.scale,
-            height: Math.abs(secondClick.y - firstClick.y) / imageContainer.scale
+            x: Math.round(cropX),
+            y: Math.round(cropY),
+            width: Math.round(cropWidth),
+            height: Math.round(cropHeight)
         }
     }
 }

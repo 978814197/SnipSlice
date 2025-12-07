@@ -1,6 +1,8 @@
 # 添加可执行程序目标，包含主程序入口
 qt_add_executable(${CMAKE_PROJECT_NAME}
         main.cpp
+        ImageProcessor.h
+        ImageProcessor.cpp
 )
 
 # 添加UI插件子目录

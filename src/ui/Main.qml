@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Dialogs
 import ui 1.0
 
@@ -36,7 +37,66 @@ Window {
             var rect = imageEditor.getSelectionRect()
             console.log("保存到:", selectedFile)
             console.log("切割区域:", rect.x, rect.y, rect.width, rect.height)
-            // 这里需要调用C++函数来实际保存图片
+
+            // 调用C++函数来裁剪并保存图片
+            var success = ImageProcessor.cropAndSave(
+                imagePath,
+                selectedFile,
+                rect.x,
+                rect.y,
+                rect.width,
+                rect.height
+            )
+
+            if (success) {
+                console.log("图片保存成功！")
+                saveSuccessDialog.open()
+            } else {
+                console.log("图片保存失败！")
+                saveErrorDialog.open()
+            }
+        }
+    }
+
+    // 保存成功提示对话框
+    Dialog {
+        id: saveSuccessDialog
+        title: "成功"
+        standardButtons: Dialog.Ok
+        anchors.centerIn: parent
+
+        contentItem: Rectangle {
+            implicitWidth: 300
+            implicitHeight: 100
+            color: "#E8F5E9"
+
+            Text {
+                anchors.centerIn: parent
+                text: "图片保存成功！"
+                font.pixelSize: 16
+                color: "#2E7D32"
+            }
+        }
+    }
+
+    // 保存失败提示对话框
+    Dialog {
+        id: saveErrorDialog
+        title: "错误"
+        standardButtons: Dialog.Ok
+        anchors.centerIn: parent
+
+        contentItem: Rectangle {
+            implicitWidth: 300
+            implicitHeight: 100
+            color: "#FFEBEE"
+
+            Text {
+                anchors.centerIn: parent
+                text: "图片保存失败，请重试！"
+                font.pixelSize: 16
+                color: "#C62828"
+            }
         }
     }
 

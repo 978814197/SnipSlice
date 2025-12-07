@@ -191,12 +191,14 @@ Item {
                 }
             }
 
-            onEntered: {
-                currentMode = getResizeMode(mouseX, mouseY)
+            onEntered: (mouse) => {
+                currentMode = getResizeMode(mouse.x, mouse.y)
             }
 
             onExited: {
-                currentMode = "none"
+                if (!isDragging) {
+                    currentMode = "none"
+                }
             }
 
             onPressed: (mouse) => {
