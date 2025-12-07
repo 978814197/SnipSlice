@@ -108,35 +108,36 @@ Rectangle {
 
                     onClicked: (mouse) => {
                         if (!root.secondClickDone && !isDragging) {
-                            var globalPos = mapToItem(imageArea, mouse.x, mouse.y)
+                            // 将鼠标坐标转换为imageArea坐标系（选区框的父坐标系）
+                            var areaPos = mapToItem(imageArea, mouse.x, mouse.y)
 
                             if (!root.firstClickDone) {
                                 // 第一次点击
-                                root.firstClick = globalPos
+                                root.firstClick = areaPos
                                 root.firstClickDone = true
                             } else {
                                 // 第二次点击
-                                root.secondClick = globalPos
+                                root.secondClick = areaPos
                                 root.secondClickDone = true
                             }
                         }
                     }
                 }
             }
+        }
 
-            // 选区显示
-            SelectionArea {
-                id: selectionArea
-                anchors.fill: parent
-                firstClick: root.firstClick
-                secondClick: root.secondClick
-                firstClickDone: root.firstClickDone
-                secondClickDone: root.secondClickDone
+        // 选区显示（移到imageArea层级，避免缩放影响）
+        SelectionArea {
+            id: selectionArea
+            anchors.fill: parent
+            firstClick: root.firstClick
+            secondClick: root.secondClick
+            firstClickDone: root.firstClickDone
+            secondClickDone: root.secondClickDone
 
-                onSelectionChanged: (newFirstClick, newSecondClick) => {
-                    root.firstClick = newFirstClick
-                    root.secondClick = newSecondClick
-                }
+            onSelectionChanged: (newFirstClick, newSecondClick) => {
+                root.firstClick = newFirstClick
+                root.secondClick = newSecondClick
             }
         }
 
