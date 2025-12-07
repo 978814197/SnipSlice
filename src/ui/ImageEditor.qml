@@ -83,6 +83,9 @@ Rectangle {
                         // 更新鼠标位置用于虚线框
                         selectionArea.currentMousePos = mapToItem(imageArea, mouse.x, mouse.y)
 
+                        // 更新坐标显示
+                        coordinateDisplay.updatePosition(mouse.x, mouse.y)
+
                         if (isDragging && root.secondClickDone) {
                             var dx = mouse.x - lastPos.x
                             var dy = mouse.y - lastPos.y
@@ -93,6 +96,14 @@ Rectangle {
 
                     onReleased: {
                         isDragging = false
+                    }
+
+                    onExited: {
+                        coordinateDisplay.visible = false
+                    }
+
+                    onEntered: {
+                        coordinateDisplay.visible = true
                     }
 
                     onClicked: (mouse) => {
@@ -121,6 +132,67 @@ Rectangle {
                 secondClick: root.secondClick
                 firstClickDone: root.firstClickDone
                 secondClickDone: root.secondClickDone
+
+                onSelectionChanged: (newFirstClick, newSecondClick) => {
+                    root.firstClick = newFirstClick
+                    root.secondClick = newSecondClick
+                }
+            }
+        }
+
+        // 坐标显示（跟随鼠标）- 放在imageArea层级，不受缩放影响
+        Rectangle {
+            id: coordinateDisplay
+            visible: false
+            width: coordText.width + 16
+            height: coordText.height + 12
+            color: "#2E7D32"
+            opacity: 0.9
+            radius: 5
+            border.color: "#1B5E20"
+            border.width: 1
+            z: 100  // 确保在最上层
+
+            property point imagePos: Qt.point(0, 0)
+
+            // 根据鼠标位置更新显示
+            function updatePosition(imgX, imgY) {
+                imagePos = Qt.point(Math.round(imgX), Math.round(imgY))
+
+                // 获取imageContainer相对于imageArea的位置，考虑缩放和偏移
+                var containerX = imageContainer.x
+                var containerY = imageContainer.y
+                var scale = imageContainer.scale
+
+                // 计算鼠标在imageArea中的实际显示位置
+                var displayX = containerX + imgX * scale
+                var displayY = containerY + imgY * scale
+
+                // 默认显示在光标右下方
+                var offsetX = 10
+                var offsetY = 10
+
+                // 如果太靠右，显示在左边
+                if (displayX + width + offsetX > imageArea.width) {
+                    offsetX = -width - 10
+                }
+
+                // 如果太靠下，显示在上边
+                if (displayY + height + offsetY > imageArea.height) {
+                    offsetY = -height - 10
+                }
+
+                x = displayX + offsetX
+                y = displayY + offsetY
+            }
+
+            Text {
+                id: coordText
+                anchors.centerIn: parent
+                text: "X: " + coordinateDisplay.imagePos.x + "  Y: " + coordinateDisplay.imagePos.y
+                color: "white"
+                font.pixelSize: 12
+                font.family: "Consolas, Monaco, monospace"
             }
         }
 
